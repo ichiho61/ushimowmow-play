@@ -1,0 +1,214 @@
+/* うしもうもう: the page around the game and the loading screen.
+   The loading screen is the farm overview by day (FarmOverviewScreen / FarmScenery / FarmSky.Day),
+   built from the same pictures, colors and layers. Sizes are in cqw/cqh of the screen, with the
+   game's 400-unit-wide column as 100cqw (so 1 unit = 0.25cqw). */
+:root {
+  --ink: #4a3320;
+  --sky-top: #8cc8ee;
+  --sky-bottom: #d6eef8;
+  --hills-far: #a8cfa0;
+  --hills-near: #8dc072;
+  --ground: #a9d27c;
+  --ground-front: #9abf71;
+  --meadow: #9fca76;
+  --sun: #ffe08a;
+  --sun-halo: rgba(255, 224, 138, 0.25);
+  --cloud: #fff;
+  --cloud-alpha: 0.95;
+  --haze: rgba(214, 238, 248, 0.28);
+  --wood: rgba(150, 199, 125, 0.7);
+  --lights: 0;
+  --shadow: rgba(51, 31, 13, 0.22);
+  --cream: #fff8e8;
+  --horizon: 43cqh;  /* from the bottom */
+}
+
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  background: #e9dcc0;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Desktop: a portrait window in the middle of the page. */
+#game {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow: 0 0 0 4px var(--ink), 0 12px 30px rgba(74, 51, 32, 0.35);
+}
+#unity-canvas { display: block; background: var(--sky-bottom); }
+
+/* Phones: the whole screen. */
+#game.mobile {
+  position: fixed; left: 0; top: 0; width: 100%; height: 100%;
+  transform: none; border-radius: 0; box-shadow: none;
+}
+#game.mobile #unity-canvas { width: 100%; height: 100%; }
+
+/* ---------- Loading screen ---------- */
+#loading {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  container-type: size;
+  background: var(--ground);
+  font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Yu Gothic UI", sans-serif;
+  color: var(--ink);
+  transition: opacity 0.6s ease;
+  z-index: 2;
+}
+#loading.done { opacity: 0; pointer-events: none; }
+#loading > * { position: absolute; }
+
+/* Sky: the top color, fading into the bottom color toward the horizon (SkyGradient). */
+#sky {
+  left: 0; right: 0; top: 0; bottom: calc(var(--horizon) - 2cqh);
+  background: linear-gradient(var(--sky-top) 25%, var(--sky-bottom));
+}
+/* Sun by day, moon by night, placed along their arc by loading.js (FarmSky.ArcProgress). */
+#sun {
+  left: 74cqw; top: 12cqh; width: 9cqw; aspect-ratio: 1;
+  margin: -4.5cqw 0 0 -4.5cqw;
+  border-radius: 50%;
+  background: var(--sun);
+  box-shadow: 0 0 0 3.5cqw var(--sun-halo);
+}
+#moon {
+  display: none;
+  width: 7.5cqw; aspect-ratio: 1;
+  margin: -3.75cqw 0 0 -3.75cqw;
+  background: #f4f1de;
+  -webkit-mask: url(Moon.png) center / 100% 100% no-repeat; mask: url(Moon.png) center / 100% 100% no-repeat;
+}
+#stars { inset: 0; }
+.star { position: absolute; aspect-ratio: 1; border-radius: 50%; background: #fffad9; }
+.cloud {
+  aspect-ratio: 9 / 4;
+  background: var(--cloud);
+  -webkit-mask: url(Cloud.png) center / 100% 100% no-repeat; mask: url(Cloud.png) center / 100% 100% no-repeat;
+  opacity: var(--cloud-alpha);
+  animation: drift linear infinite;
+}
+.cloud.c1 { top: 8cqh;  width: 22cqw; animation-duration: 70s; animation-delay: -10s; }
+.cloud.c2 { top: 17cqh; width: 17cqw; animation-duration: 90s; animation-delay: -55s; }
+.cloud.c3 { top: 4cqh;  width: 14cqw; animation-duration: 110s; animation-delay: -80s; }
+.cloud.c4 { top: 36cqh; width: 10cqw; animation-duration: 140s; animation-delay: -30s; opacity: calc(var(--cloud-alpha) * 0.55); }
+.cloud.c5 { top: 40cqh; width: 8.5cqw; animation-duration: 160s; animation-delay: -120s; opacity: calc(var(--cloud-alpha) * 0.55); }
+@keyframes drift { from { left: -25cqw; } to { left: 105cqw; } }
+
+/* Tinted white pictures (the hills, the far wood): the picture is the mask, the color the fill. */
+#hills-far, #hills-near, .wood {
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+/* The hills stand on the horizon: far ones 86 units tall, near ones 50 (BuildLand). */
+#hills-far {
+  left: 0; right: 0; bottom: calc(var(--horizon) - 1cqw); height: 22.5cqw;
+  background: var(--hills-far);
+  -webkit-mask-image: url(HillsFar.png); mask-image: url(HillsFar.png);
+}
+#haze {
+  left: 0; right: 0; bottom: calc(var(--horizon) - 1cqw); height: 12.5cqw;
+  background: linear-gradient(transparent, var(--haze));
+}
+#hills-near {
+  left: 0; right: 0; bottom: calc(var(--horizon) - 1cqw); height: 13.5cqw;
+  background: var(--hills-near);
+  -webkit-mask-image: url(HillsNear.png); mask-image: url(HillsNear.png);
+}
+/* A far wood at the foot of the near hills, in their color (FarmScenery.Wood). */
+.wood {
+  bottom: calc(var(--horizon) - 0.5cqw); aspect-ratio: 3 / 4;
+  background: var(--wood);
+  -webkit-mask-image: url(Tree.png); mask-image: url(Tree.png);
+}
+
+/* Ground: darker toward the front, a few soft patches of deeper meadow (FarmScenery.Ground). */
+#ground {
+  left: 0; right: 0; bottom: 0; height: var(--horizon);
+  background: linear-gradient(var(--ground), var(--ground-front));
+}
+.meadow {
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--meadow) 55%, transparent);
+}
+
+.shadow { border-radius: 50%; background: var(--shadow); }
+/* What stands on the ground is in the sky's light (SkyPalette.Light): multiplied by it through
+   the #light filter, whose color loading.js sets. */
+.tree, #road, #barn, #cow .bob { filter: url(#light); }
+#barn-lights { left: 3cqw; width: 48cqw; bottom: calc(19cqh + 8cqw); opacity: var(--lights); }
+.tree { aspect-ratio: 3 / 4; background: url(Tree.png) center / 100% 100% no-repeat; }
+
+/* The farm road (Path.png laid on its side), no outline, like the overview's paths. */
+#road {
+  left: 0; right: 0; bottom: 19cqh; height: 11cqw;
+  background: url(Road.png) left center / auto 100% repeat-x;
+}
+/* The part of the road she has walked: the progress bar. */
+#trail {
+  right: 0; bottom: calc(19cqh + 3.5cqw); height: 4cqw; width: 0;
+  background-image: radial-gradient(circle, rgba(140, 100, 60, 0.45) 22%, transparent 25%);
+  background-size: 6cqw 100%;
+  background-position: right center;
+}
+
+#barn-shadow { left: 2cqw; width: 50cqw; bottom: calc(19cqh + 7cqw); height: 4cqw; }
+#barn { left: 3cqw; width: 48cqw; bottom: calc(19cqh + 8cqw); }
+
+#cow { bottom: calc(19cqh + 2cqw); transform: translateX(-50%); }
+#cow .shadow { position: absolute; left: 8%; right: 8%; bottom: -1.5cqw; height: 4cqw; }
+#cow .bob { position: relative; animation: bob 0.5s ease-in-out infinite; transform-origin: 50% 100%; }
+#cow img, #cow canvas { display: block; width: 100%; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(-4%) rotate(1.5deg); }
+}
+#cow.home .bob { animation: none; }
+
+#title {
+  left: 0; right: 0; top: 22cqh;
+  text-align: center;
+  font-weight: 800;
+  font-size: min(16cqw, 66px);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+#title span {
+  display: inline-block;
+  color: #fff;
+  -webkit-text-stroke: 0.16em var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 0.09em 0 var(--ink);
+  animation: hop 2.4s ease-in-out infinite;
+}
+@keyframes hop {
+  0%, 70%, 100% { transform: translateY(0); }
+  80% { transform: translateY(-0.16em); }
+  90% { transform: translateY(0.02em); }
+}
+
+#status {
+  left: 0; right: 0; bottom: 8cqh;
+  text-align: center;
+  font-weight: 800;
+  color: var(--status, var(--ink));
+  font-size: min(5.2cqw, 20px);
+}
+#status .pct { display: inline-block; min-width: 3.2em; text-align: left; }
+
+#loading-error {
+  display: none;
+  left: 8%; right: 8%; top: 40%;
+  padding: 16px;
+  background: var(--cream);
+  border: 4px solid var(--ink);
+  border-radius: 14px;
+  text-align: center; font-weight: 700; font-size: 16px; line-height: 1.6;
+}
+
+#unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); z-index: 3; display: none; }

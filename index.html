@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>うしもうもう</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="うしもうもう">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#c8e8a0">
+    <link rel="apple-touch-icon" href="icon-180.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="TemplateData/icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Only the letters the loading screen uses. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800&text=%E3%81%86%E3%81%97%E3%82%82%E3%82%88%E3%81%BF%E3%81%93%E4%B8%AD%E2%80%A6%25%E3%82%81%E3%81%BE%E3%81%9B%E3%82%93%E3%81%A7%E3%81%9F%E3%80%82%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E8%AA%AD%E7%9B%B4%E3%81%8F%E3%81%A0%E3%81%95%E3%81%840123456789&display=block">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="TemplateData/loading.js"></script>
+  </head>
+  <body>
+    <div id="game">
+      <canvas id="unity-canvas" width=450 height=800 tabindex="-1"></canvas>
+      <svg width="0" height="0" style="position:absolute"><filter id="light" color-interpolation-filters="sRGB"><feColorMatrix id="light-matrix" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter></svg>
+      <div id="loading">
+        <div id="sky"></div>
+        <div id="stars"></div>
+        <div id="sun"></div>
+        <div id="moon"></div>
+        <div class="cloud c4"></div><div class="cloud c5"></div>
+        <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+        <div id="hills-far"></div>
+        <div id="haze"></div>
+        <div class="wood" style="left:14cqw;width:7cqw"></div><div class="wood" style="left:19cqw;width:6cqw"></div>
+        <div class="wood" style="left:58cqw;width:7.5cqw"></div><div class="wood" style="left:63cqw;width:6.5cqw"></div>
+        <div class="wood" style="left:80cqw;width:7cqw"></div>
+        <div id="hills-near"></div>
+        <div id="ground"></div>
+        <div class="meadow" style="left:-10cqw;bottom:30cqh;width:55cqw;height:10cqw"></div>
+        <div class="meadow" style="left:62cqw;bottom:26cqh;width:60cqw;height:11cqw"></div>
+        <div class="meadow" style="left:20cqw;bottom:4cqh;width:75cqw;height:12cqw"></div>
+        <div class="shadow" style="left:4cqw;bottom:calc(var(--horizon) - 5.5cqh);width:15cqw;height:2.6cqw"></div>
+        <div class="tree" style="left:5cqw;bottom:calc(var(--horizon) - 5cqh);width:13cqw"></div>
+        <div class="shadow" style="left:80cqw;bottom:calc(var(--horizon) - 4cqh);width:13cqw;height:2.2cqw"></div>
+        <div class="tree" style="left:81cqw;bottom:calc(var(--horizon) - 3.6cqh);width:11cqw"></div>
+        <div id="title"><span>う</span><span>し</span><span>も</span><span>う</span><span>も</span><span>う</span></div>
+        <div id="road"></div>
+        <div id="trail"></div>
+        <div id="barn-shadow" class="shadow"></div>
+        <img id="barn" src="TemplateData/AdultBarn.png" alt="">
+        <img id="barn-lights" src="TemplateData/AdultBarn_Lights.png" alt="">
+        <div id="cow"></div>
+        <div id="status">よみこみ中… <span class="pct">0%</span></div>
+        <div id="loading-error"></div>
+      </div>
+      <div id="unity-warning"></div>
+    </div>
+    <script>
+      var spans = document.querySelectorAll("#title span");
+      for (var i = 0; i < spans.length; i++) spans[i].style.animationDelay = (i * 0.12) + "s";
+      UshiLoading.init("TemplateData");
+
+      var game = document.querySelector("#game");
+      var canvas = document.querySelector("#unity-canvas");
+
+      function unityShowBanner(msg, type) {
+        // Only errors matter to players; Unity's warnings are for us.
+        if (type == 'error') UshiLoading.fail(msg);
+        else console.warn(msg);
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/WebGL.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/WebGL.data.unityweb",
+        frameworkUrl: buildUrl + "/WebGL.framework.js.unityweb",
+        codeUrl: buildUrl + "/WebGL.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "UshiMowMow",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+      };
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        game.className = "mobile";
+      } else {
+        canvas.style.width = "450px";
+        canvas.style.height = "800px";
+      }
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          UshiLoading.set(progress);
+        }).then((unityInstance) => {
+          UshiLoading.done();
+        }).catch((message) => {
+          console.error(message);
+          UshiLoading.fail("よみこめませんでした。ページを読み直してください。");
+        });
+      };
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
